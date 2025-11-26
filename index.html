@@ -46,45 +46,25 @@
     </div>
 
     <!-- =====================================================
-         GAME OVER SCREEN
+         GAME OVER SCREEN  (정확한 1개만 존재)
     ====================================================== -->
-    <!-- =====================================================
-     GAME OVER SCREEN
-====================================================== -->
-<div id="gameOverScreen" class="screen-overlay hidden">
-    <div class="screen-content">
-        <h2 class="screen-title">GAME OVER</h2>
-
-        <p style="font-size:20px; margin-top:10px;">
-            Score: <span id="finalScore">0</span>
-        </p>
-
-        <button onclick="window.location='leaderboard.html'"
-                class="btn"
-                style="width:100%;margin-top:20px">
-            View Leaderboard
-        </button>
-
-        <button onclick="window.location.reload()"
-                class="btn btn-secondary"
-                style="width:100%;margin-top:10px">
-            Play Again
-        </button>
-    </div>
-</div>
-
     <div id="gameOverScreen" class="screen-overlay hidden">
         <div class="screen-content">
             <h2 class="screen-title">GAME OVER</h2>
-            <p style="font-size:20px">
+
+            <p style="font-size:20px; margin-top:10px;">
                 Score: <span id="finalScore">0</span>
             </p>
 
-            <button onclick="window.location='leaderboard.html'" class="btn" style="width:100%;margin-top:20px">
+            <button onclick="window.location='leaderboard.html'"
+                    class="btn"
+                    style="width:100%;margin-top:20px">
                 View Leaderboard
             </button>
 
-            <button onclick="window.location.reload()" class="btn btn-secondary" style="width:100%;margin-top:10px">
+            <button onclick="window.location.reload()"
+                    class="btn btn-secondary"
+                    style="width:100%;margin-top:10px">
                 Play Again
             </button>
         </div>
