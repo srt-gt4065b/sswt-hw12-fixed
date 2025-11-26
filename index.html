@@ -2,163 +2,1409 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>🚀 GALAGA - Space Monster Defense</title>
+    <style>
+/* ============================================================
+   GLOBAL RESET & BASE
+============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-    <title>Galaga Game</title>
+body {
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2a 100%);
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
 
-    <!-- Styles -->
-    <link rel="stylesheet" href="assets/css/style.css" />
+.hidden {
+    display: none !important;
+}
+
+/* ============================================================
+   GAME LAYOUT
+============================================================ */
+.game-container {
+    max-width: 420px;
+    margin: 10px auto;
+    padding: 15px;
+    background: linear-gradient(180deg, rgba(0,20,40,0.95) 0%, rgba(10,10,30,0.98) 100%);
+    border: 3px solid #00ff88;
+    border-radius: 15px;
+    box-shadow: 
+        0 0 30px rgba(0,255,136,0.3),
+        0 0 60px rgba(0,255,136,0.1),
+        inset 0 0 30px rgba(0,255,136,0.05);
+}
+
+.game-header {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.game-title {
+    font-size: 32px;
+    color: #00ffcc;
+    letter-spacing: 8px;
+    text-shadow: 
+        0 0 10px #00ffcc,
+        0 0 20px #00ffcc,
+        0 0 40px #00ffcc,
+        0 0 80px #00ffcc;
+    animation: titleGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes titleGlow {
+    from { text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc, 0 0 40px #00ffcc; }
+    to { text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc, 0 0 60px #00ffcc, 0 0 100px #ff00ff; }
+}
+
+@keyframes neonGlow {
+    from { text-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 40px #00ff88; }
+    to { text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88, 0 0 60px #00ff88, 0 0 80px #00ffcc; }
+}
+
+@keyframes strongNeon {
+    0% { 
+        text-shadow: 0 0 5px #fff, 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 40px #00ff88, 0 0 60px #00ff88, 0 0 80px #00ff88, 0 0 100px #00ff88;
+        filter: brightness(1);
+    }
+    50% { 
+        text-shadow: 0 0 10px #fff, 0 0 20px #00ffcc, 0 0 40px #00ffcc, 0 0 80px #00ffcc, 0 0 120px #00ffcc, 0 0 150px #ff00ff;
+        filter: brightness(1.2);
+    }
+    100% { 
+        text-shadow: 0 0 5px #fff, 0 0 15px #00ff88, 0 0 30px #00ff88, 0 0 60px #00ff88, 0 0 100px #00ff88, 0 0 140px #00ffcc;
+        filter: brightness(1.1);
+    }
+}
+
+.game-subtitle {
+    color: #ff00ff;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px #ff00ff;
+}
+
+.game-stats {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+    border: 2px solid #00ff88;
+    border-radius: 8px;
+    background: rgba(0,255,136,0.05);
+}
+
+.stat {
+    font-size: 13px;
+    color: #00ff88;
+    text-shadow: 0 0 5px #00ff88;
+}
+
+.player-info {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0,255,136,0.3);
+    color: #ffcc00;
+    font-size: 14px;
+    text-shadow: 0 0 10px #ffcc00;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    background: radial-gradient(ellipse at center, #0a0a2a 0%, #000010 100%);
+    border: 3px solid #00ff88;
+    border-radius: 5px;
+    box-shadow: 
+        0 0 20px rgba(0,255,136,0.5),
+        inset 0 0 50px rgba(0,0,0,0.8);
+}
+
+/* ============================================================
+   DESKTOP CONTROLS
+============================================================ */
+.controls {
+    text-align: center;
+    margin-top: 12px;
+}
+
+.btn {
+    background: linear-gradient(180deg, #ffcc00 0%, #ff9900 100%);
+    color: #000;
+    border: none;
+    padding: 12px 24px;
+    margin: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Courier New', monospace;
+    box-shadow: 
+        0 4px 0 #cc7700,
+        0 0 15px rgba(255,204,0,0.5);
+    transition: all 0.1s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn:hover {
+    background: linear-gradient(180deg, #ffdd33 0%, #ffaa00 100%);
+    box-shadow: 
+        0 4px 0 #cc7700,
+        0 0 25px rgba(255,204,0,0.7);
+}
+
+.btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 15px rgba(255,204,0,0.5);
+}
+
+.btn-secondary {
+    background: linear-gradient(180deg, #444 0%, #222 100%);
+    color: #fff;
+    box-shadow: 
+        0 4px 0 #111,
+        0 0 15px rgba(100,100,100,0.3);
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(180deg, #555 0%, #333 100%);
+}
+
+/* ============================================================
+   MOBILE CONTROLS
+============================================================ */
+#mobileControls {
+    display: none;
+    background: linear-gradient(180deg, rgba(10,10,30,0.98) 0%, rgba(0,0,20,0.99) 100%);
+    border-top: 3px solid #00ff88;
+    padding: 15px 10px 25px;
+    box-shadow: 0 -10px 30px rgba(0,255,136,0.2);
+}
+
+.mobile-controls-inner {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.direction-btns {
+    display: flex;
+    gap: 10px;
+}
+
+.dir-btn {
+    width: 70px;
+    height: 70px;
+    border-radius: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    background: linear-gradient(180deg, rgba(0,255,136,0.2) 0%, rgba(0,255,136,0.05) 100%);
+    border: 3px solid #00ff88;
+    color: #00ff88;
+    box-shadow: 
+        0 6px 0 rgba(0,100,50,0.8),
+        0 0 20px rgba(0,255,136,0.3);
+    user-select: none;
+    transition: all 0.1s;
+}
+
+.dir-btn:active {
+    transform: translateY(6px);
+    box-shadow: 0 0 20px rgba(0,255,136,0.5);
+    background: rgba(0,255,136,0.3);
+}
+
+.fire-btn {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    font-size: 18px;
+    font-weight: bold;
+    background: linear-gradient(180deg, rgba(255,0,100,0.3) 0%, rgba(255,0,100,0.1) 100%);
+    border: 4px solid #ff0066;
+    color: #ff0066;
+    box-shadow: 
+        0 8px 0 rgba(150,0,50,0.8),
+        0 0 30px rgba(255,0,102,0.4);
+    user-select: none;
+    text-shadow: 0 0 10px #ff0066;
+    letter-spacing: 2px;
+}
+
+.fire-btn:active {
+    transform: translateY(8px);
+    box-shadow: 0 0 40px rgba(255,0,102,0.6);
+    background: rgba(255,0,100,0.4);
+}
+
+.pause-btn-mobile {
+    padding: 10px 15px;
+    background: rgba(100,100,100,0.2);
+    border: 2px solid #888;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #aaa;
+}
+
+@media (max-width: 768px) {
+    #mobileControls {
+        display: block !important;
+    }
+    .controls {
+        display: none;
+    }
+    .game-container {
+        margin: 5px auto;
+        border-radius: 10px;
+    }
+}
+
+/* ============================================================
+   OVERLAYS
+============================================================ */
+.screen-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.screen-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.screen-content {
+    background: linear-gradient(180deg, rgba(0,20,40,0.98) 0%, rgba(10,10,30,0.99) 100%);
+    padding: 35px;
+    border: 4px solid #00ff88;
+    width: 90%;
+    max-width: 380px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 
+        0 0 50px rgba(0,255,136,0.5),
+        0 0 100px rgba(0,255,136,0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.screen-overlay.show .screen-content {
+    transform: scale(1);
+}
+
+.screen-title {
+    font-size: 36px;
+    color: #00ffcc;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-shadow: 
+        0 0 20px #00ffcc,
+        0 0 40px #00ffcc;
+    letter-spacing: 3px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-label {
+    color: #00ff88;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+.form-input {
+    width: 100%;
+    border: 2px solid #00ff88;
+    background: rgba(0,255,136,0.05);
+    color: #fff;
+    padding: 12px 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Courier New', monospace;
+    transition: all 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #00ffcc;
+    background: rgba(0,255,136,0.1);
+    box-shadow: 0 0 20px rgba(0,255,136,0.3);
+}
+
+.form-input::placeholder {
+    color: rgba(255,255,255,0.3);
+}
+
+.error-message {
+    color: #ff4466;
+    margin-top: 5px;
+    font-size: 12px;
+    display: none;
+    text-shadow: 0 0 5px #ff4466;
+}
+
+.final-score {
+    font-size: 48px;
+    color: #ffcc00;
+    text-shadow: 0 0 20px #ffcc00, 0 0 40px #ffcc00;
+    margin: 20px 0;
+}
+
+.final-stage {
+    font-size: 18px;
+    color: #00ff88;
+    margin-bottom: 20px;
+}
+
+/* Stage Clear Animation */
+.stage-clear-title {
+    font-size: 42px;
+    color: #ffcc00;
+    animation: stagePulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes stagePulse {
+    from { transform: scale(1); text-shadow: 0 0 20px #ffcc00; }
+    to { transform: scale(1.1); text-shadow: 0 0 40px #ffcc00, 0 0 60px #ff00ff; }
+}
+
+/* ============================================================
+   INSTRUCTIONS
+============================================================ */
+.instructions {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(0,255,136,0.05);
+    border: 1px solid rgba(0,255,136,0.3);
+    border-radius: 8px;
+    font-size: 12px;
+    color: #888;
+    text-align: left;
+}
+
+.instructions h4 {
+    color: #00ff88;
+    margin-bottom: 8px;
+}
+
+.instructions p {
+    margin: 4px 0;
+}
+
+.key {
+    display: inline-block;
+    padding: 2px 8px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid #666;
+    border-radius: 4px;
+    font-size: 11px;
+}
+    </style>
 </head>
 <body>
 
-    <!-- =====================================================
-         START SCREEN
-    ====================================================== -->
-    <div id="startScreen" class="screen-overlay">
-        <div class="screen-content">
-            <h2 class="screen-title">🚀 GALAGA 🚀</h2>
+<!-- =====================================================
+     START SCREEN
+====================================================== -->
+<div id="startScreen" class="screen-overlay show">
+    <div class="screen-content">
+        <div style="color:#00ff88; font-size:20px; font-weight:bold; letter-spacing:4px; margin-bottom:10px; text-shadow: 0 0 5px #fff, 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 40px #00ff88, 0 0 60px #00ff88, 0 0 80px #00ff88, 0 0 100px #00ff88; animation: strongNeon 1.5s ease-in-out infinite alternate;">Woosong AI Management</div>
+        <h2 class="screen-title">🚀 GALAGA 🚀</h2>
+        <p style="color:#ff00ff; margin-bottom:25px; text-shadow: 0 0 10px #ff00ff;">Space Monster Defense</p>
 
-            <div class="form-group">
-                <label class="form-label">Student ID</label>
-                <input id="studentIdInput" class="form-input" placeholder="ex) 20241234" />
-                <div id="idError" class="error-message">Please enter your student ID.</div>
-            </div>
+        <div class="form-group">
+            <label class="form-label">📋 Student ID</label>
+            <input id="studentIdInput" class="form-input" placeholder="ex) 20241234" />
+            <div id="idError" class="error-message">⚠️ Please enter your student ID.</div>
+        </div>
 
-            <div class="form-group">
-                <label class="form-label">Name</label>
-                <input id="playerNameInput" class="form-input" placeholder="ex) Kim Daniel" />
-                <div id="nameError" class="error-message">Please enter your name.</div>
-            </div>
+        <div class="form-group">
+            <label class="form-label">👤 Name</label>
+            <input id="playerNameInput" class="form-input" placeholder="ex) Kim Daniel" />
+            <div id="nameError" class="error-message">⚠️ Please enter your name.</div>
+        </div>
 
-            <button id="btnStart" class="btn" style="width:100%;margin-top:10px">
-                Start Game
-            </button>
+        <button id="btnStart" class="btn" style="width:100%; margin-top:15px; font-size:18px; padding:15px;">
+            🎮 START GAME
+        </button>
+
+        <div class="instructions">
+            <h4>🎯 How to Play</h4>
+            <p><span class="key">←</span> <span class="key">→</span> Move spaceship</p>
+            <p><span class="key">SPACE</span> Fire laser</p>
+            <p><span class="key">P</span> Pause game</p>
+            <p style="margin-top:8px; color:#ffcc00;">💡 Clear Stage 10 to complete!</p>
         </div>
     </div>
+</div>
 
-    <!-- =====================================================
-         STAGE CLEAR SCREEN
-    ====================================================== -->
-    <div id="stageClearScreen" class="screen-overlay hidden">
-        <div class="screen-content">
-            <h2 class="screen-title">Stage Clear!</h2>
-        </div>
+<!-- =====================================================
+     STAGE CLEAR SCREEN
+====================================================== -->
+<div id="stageClearScreen" class="screen-overlay">
+    <div class="screen-content">
+        <h2 class="stage-clear-title">⭐ STAGE CLEAR! ⭐</h2>
+        <p style="color:#00ff88; margin-top:15px; font-size:18px;">Get ready for next wave...</p>
+    </div>
+</div>
+
+<!-- =====================================================
+     GAME OVER SCREEN
+====================================================== -->
+<div id="gameOverScreen" class="screen-overlay">
+    <div class="screen-content">
+        <h2 class="screen-title" style="color:#ff4466;">💀 GAME OVER 💀</h2>
+        
+        <div class="final-score" id="finalScore">0</div>
+        <div class="final-stage">Stage <span id="finalStage">1</span> Reached</div>
+
+        <button onclick="window.location='leaderboard.html'" class="btn" style="width:100%;">
+            🏆 View Leaderboard
+        </button>
+
+        <button onclick="window.location.reload()" class="btn btn-secondary" style="width:100%; margin-top:10px;">
+            🔄 Play Again
+        </button>
+    </div>
+</div>
+
+<!-- =====================================================
+     GAME COMPLETE SCREEN (Stage 10 Clear)
+====================================================== -->
+<div id="gameCompleteScreen" class="screen-overlay">
+    <div class="screen-content">
+        <h2 class="screen-title" style="color:#ffcc00;">🎉 VICTORY! 🎉</h2>
+        <p style="color:#00ff88; font-size:16px;">You defeated all aliens!</p>
+        
+        <div class="final-score" id="victoryScore">0</div>
+        <div class="final-stage" style="color:#ffcc00;">🏆 All 10 Stages Cleared!</div>
+
+        <button onclick="window.location='leaderboard.html'" class="btn" style="width:100%;">
+            🏆 View Leaderboard
+        </button>
+
+        <button onclick="window.location.reload()" class="btn btn-secondary" style="width:100%; margin-top:10px;">
+            🔄 Play Again
+        </button>
+    </div>
+</div>
+
+<!-- =====================================================
+     GAME UI
+====================================================== -->
+<div class="game-container">
+    <div class="game-header">
+        <div style="color:#00ff88; font-size:15px; font-weight:bold; letter-spacing:3px; margin-bottom:5px; text-shadow: 0 0 5px #fff, 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 40px #00ff88, 0 0 60px #00ff88, 0 0 80px #00ff88; animation: strongNeon 1.5s ease-in-out infinite alternate;">Woosong AI Management</div>
+        <div class="game-title">GALAGA</div>
+        <div class="game-subtitle">SPACE MONSTER DEFENSE</div>
     </div>
 
-    <!-- =====================================================
-         GAME OVER SCREEN  (정확한 1개만 존재)
-    ====================================================== -->
-    <div id="gameOverScreen" class="screen-overlay hidden">
-        <div class="screen-content">
-            <h2 class="screen-title">GAME OVER</h2>
-
-            <p style="font-size:20px; margin-top:10px;">
-                Score: <span id="finalScore">0</span>
-            </p>
-
-            <button onclick="window.location='leaderboard.html'"
-                    class="btn"
-                    style="width:100%;margin-top:20px">
-                View Leaderboard
-            </button>
-
-            <button onclick="window.location.reload()"
-                    class="btn btn-secondary"
-                    style="width:100%;margin-top:10px">
-                Play Again
-            </button>
-        </div>
+    <div class="game-stats">
+        <div class="player-info" id="playerInfo">Player: ---</div>
+        <div class="stat">Score: <span id="score">0</span></div>
+        <div class="stat">Stage: <span id="stage">1</span>/10</div>
+        <div class="stat">Lives: <span id="lives">❤️❤️❤️</span></div>
     </div>
 
-    <!-- =====================================================
-         GAME UI
-    ====================================================== -->
+    <canvas id="gameCanvas" width="360" height="480"></canvas>
 
-    <div class="game-container">
-
-        <div class="game-header">
-            <div class="game-title">GALAGA</div>
-            <div class="game-subtitle">Space Monster Defense</div>
-        </div>
-
-        <div class="game-stats">
-            <div class="stat">Score: <span id="score">0</span></div>
-            <div class="stat">Stage: <span id="stage">1</span></div>
-            <div class="stat">Lives: <span id="lives">❤️❤️❤️</span></div>
-            <div class="stat">High Score: <span id="highScore">0</span></div>
-        </div>
-
-        <canvas id="gameCanvas" width="360" height="480"></canvas>
-
-        <div class="controls">
-            <button onclick="game.togglePause()" class="btn">Pause</button>
-        </div>
+    <div class="controls">
+        <button onclick="game.togglePause()" class="btn btn-secondary">⏸️ Pause</button>
     </div>
+</div>
 
-    <!-- =====================================================
-         MOBILE CONTROLS
-    ====================================================== -->
-    <div id="mobileControls">
-        <div class="mobile-controls-inner">
-
-            <div class="dpad">
-                <div></div>
-                <button id="btnUp" class="dpad-btn">▲</button>
-                <div></div>
-
-                <button id="btnLeft" class="dpad-btn">◀</button>
-                <div></div>
-                <button id="btnRight" class="dpad-btn">▶</button>
-
-                <div></div>
-                <button id="btnDown" class="dpad-btn">▼</button>
-                <div></div>
-            </div>
-
-            <button id="btnFire" class="fire-btn">FIRE</button>
-
-            <button onclick="game.togglePause()" class="pause-btn-mobile">Pause</button>
+<!-- =====================================================
+     MOBILE CONTROLS
+====================================================== -->
+<div id="mobileControls">
+    <div class="mobile-controls-inner">
+        <div class="direction-btns">
+            <button id="btnLeft" class="dir-btn">◀</button>
+            <button id="btnRight" class="dir-btn">▶</button>
         </div>
+
+        <button id="btnFire" class="fire-btn">FIRE</button>
+
+        <button onclick="game.togglePause()" class="pause-btn-mobile">⏸️</button>
     </div>
+</div>
 
-    <!-- =====================================================
-         SCRIPTS
-    ====================================================== -->
+<!-- =====================================================
+     SCRIPTS
+====================================================== -->
+<script type="module">
+/* ============================================================
+   Firebase Configuration
+============================================================ */
+const firebaseConfig = {
+    apiKey: "AIzaSyDKHFod7Hr8qeUgUb052Ir3DCxF0ZRb6To",
+    authDomain: "sswt2025fall.firebaseapp.com",
+    databaseURL: "https://sswt2025fall-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "sswt2025fall",
+    storageBucket: "sswt2025fall.firebasestorage.app",
+    messagingSenderId: "304733564282",
+    appId: "1:304733564282:web:e8ec392e6fe4bf871dbac3"
+};
 
-    <script src="assets/js/firebase.js" type="module"></script>
-    <script src="assets/js/game.js"></script>
+let database = null;
+window.firebaseReady = false;
 
-    <script>
-        // Start Screen → Game Start Logic
-        document.getElementById("btnStart").addEventListener("click", () => {
-            const studentId = document.getElementById("studentIdInput").value.trim();
-            const playerName = document.getElementById("playerNameInput").value.trim();
+try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
+    const { getDatabase } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
+    
+    const app = initializeApp(firebaseConfig);
+    database = getDatabase(app);
+    window.firebaseReady = true;
+    console.log("✅ Firebase connected!");
+} catch (err) {
+    console.warn("⚠️ Firebase unavailable, using local storage");
+}
 
-            let valid = true;
+// Save score function
+window.saveScore = async function(score, stage, playerName, studentId) {
+    const scoreObj = {
+        studentId,
+        playerName,
+        score,
+        stage,
+        timestamp: Date.now(),
+        date: new Date().toISOString()
+    };
+    
+    // Local backup
+    const local = JSON.parse(localStorage.getItem("galagaScores") || "[]");
+    local.push(scoreObj);
+    localStorage.setItem("galagaScores", JSON.stringify(local));
+    
+    if (!window.firebaseReady || !database) return;
+    
+    try {
+        const { ref, push } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
+        await push(ref(database, "scores"), scoreObj);
+        console.log("✅ Score saved to Firebase!");
+    } catch (err) {
+        console.error("Firebase save error:", err);
+    }
+};
+</script>
 
-            if (!studentId) {
-                document.getElementById("idError").style.display = "block";
-                valid = false;
-            } else {
-                document.getElementById("idError").style.display = "none";
+<script>
+/* ============================================================
+   GALAGA GAME ENGINE - Enhanced Graphics Version
+============================================================ */
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+window.game = {
+    // Player
+    player: {
+        x: canvas.width / 2 - 19,
+        y: canvas.height - 55,
+        width: 38,
+        height: 32,
+        speed: 6
+    },
+    
+    // Game state
+    bullets: [],
+    enemies: [],
+    enemyBullets: [],
+    particles: [],
+    stars: [],
+    powerUps: [],
+    
+    score: 0,
+    lives: 3,
+    stage: 1,
+    maxStage: 10,
+    isRunning: false,
+    isPaused: false,
+    keys: {},
+    lastEnemyShot: 0,
+    enemyShotDelay: 1200,
+    
+    playerName: "",
+    studentId: "",
+    
+    // Animation
+    frameCount: 0,
+    
+    /* ======================================================
+       INITIALIZATION
+    ====================================================== */
+    init() {
+        this.setupStars();
+        this.setupControls();
+        this.setupMobileControls();
+    },
+    
+    setupStars() {
+        this.stars = [];
+        for (let i = 0; i < 100; i++) {
+            this.stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2 + 0.5,
+                speed: Math.random() * 1 + 0.5,
+                brightness: Math.random()
+            });
+        }
+    },
+    
+    setupControls() {
+        document.addEventListener("keydown", (e) => {
+            this.keys[e.key] = true;
+            if (e.key === " " && this.isRunning && !this.isPaused) {
+                e.preventDefault();
+                this.shoot();
             }
-
-            if (!playerName) {
-                document.getElementById("nameError").style.display = "block";
-                valid = false;
-            } else {
-                document.getElementById("nameError").style.display = "none";
+            if (e.key === "p" || e.key === "P") {
+                this.togglePause();
             }
-
-            if (!valid) return;
-
-            game.studentId = studentId;
-            game.playerName = playerName;
-
-            document.getElementById("startScreen").classList.add("hidden");
-            game.start();
         });
-    </script>
+        document.addEventListener("keyup", (e) => {
+            this.keys[e.key] = false;
+        });
+    },
+    
+    setupMobileControls() {
+        const btnLeft = document.getElementById("btnLeft");
+        const btnRight = document.getElementById("btnRight");
+        const btnFire = document.getElementById("btnFire");
+        
+        // Left button
+        btnLeft.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            this.keys["ArrowLeft"] = true;
+        });
+        btnLeft.addEventListener("touchend", () => {
+            this.keys["ArrowLeft"] = false;
+        });
+        
+        // Right button
+        btnRight.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            this.keys["ArrowRight"] = true;
+        });
+        btnRight.addEventListener("touchend", () => {
+            this.keys["ArrowRight"] = false;
+        });
+        
+        // Fire button
+        btnFire.addEventListener("touchstart", (e) => {
+            e.preventDefault();
+            if (this.isRunning && !this.isPaused) this.shoot();
+        });
+    },
+    
+    /* ======================================================
+       GAME START
+    ====================================================== */
+    start() {
+        this.score = 0;
+        this.lives = 3;
+        this.stage = 1;
+        this.bullets = [];
+        this.enemyBullets = [];
+        this.particles = [];
+        this.player.x = canvas.width / 2 - 19;
+        this.isRunning = true;
+        this.isPaused = false;
+        
+        document.getElementById("playerInfo").textContent = 
+            `Player: ${this.studentId} - ${this.playerName}`;
+        
+        this.createEnemies();
+        this.updateStats();
+        this.loop();
+    },
+    
+    /* ======================================================
+       CREATE ENEMIES - Classic Galaga Formation
+    ====================================================== */
+    createEnemies() {
+        const rows = Math.min(4 + Math.floor(this.stage / 2), 6);
+        const cols = 7;
+        this.enemies = [];
+        
+        const w = 32;
+        const h = 26;
+        const pad = 10;
+        const offsetX = (canvas.width - cols * (w + pad)) / 2;
+        
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                let type, health, points;
+                
+                // 클래식 Galaga 배치: 보스(위) → 엘리트(빨강) → 일반(파랑)
+                if (r === 0) {
+                    type = "boss";      // 초록 보스
+                    health = 3;
+                    points = 50;
+                } else if (r === 1) {
+                    type = "elite";     // 빨간 나비
+                    health = 2;
+                    points = 30;
+                } else {
+                    type = "normal";    // 파란 벌
+                    health = 1;
+                    points = 10;
+                }
+                
+                this.enemies.push({
+                    x: offsetX + c * (w + pad),
+                    y: 45 + r * (h + pad),
+                    width: w,
+                    height: h,
+                    speed: 1 + (this.stage - 1) * 0.2,
+                    direction: 1,
+                    type,
+                    health,
+                    maxHealth: health,
+                    points,
+                    animOffset: Math.random() * Math.PI * 2
+                });
+            }
+        }
+        
+        this.enemyShotDelay = Math.max(500, 1200 - this.stage * 80);
+    },
+    
+    /* ======================================================
+       PLAYER SHOOT
+    ====================================================== */
+    shoot() {
+        if (this.bullets.length < 3) {
+            this.bullets.push({
+                x: this.player.x + this.player.width / 2 - 3,
+                y: this.player.y - 5,
+                width: 6,
+                height: 15,
+                speed: 10
+            });
+        }
+    },
+    
+    /* ======================================================
+       GAME LOOP
+    ====================================================== */
+    loop() {
+        if (!this.isRunning) return;
+        
+        this.frameCount++;
+        
+        if (!this.isPaused) {
+            this.update();
+            this.draw();
+        }
+        
+        requestAnimationFrame(() => this.loop());
+    },
+    
+    /* ======================================================
+       UPDATE LOGIC
+    ====================================================== */
+    update() {
+        // Stars parallax
+        this.stars.forEach(star => {
+            star.y += star.speed;
+            if (star.y > canvas.height) {
+                star.y = 0;
+                star.x = Math.random() * canvas.width;
+            }
+        });
+        
+        // Player movement
+        if (this.keys["ArrowLeft"] && this.player.x > 5) {
+            this.player.x -= this.player.speed;
+        }
+        if (this.keys["ArrowRight"] && this.player.x < canvas.width - this.player.width - 5) {
+            this.player.x += this.player.speed;
+        }
+        
+        // Update bullets
+        this.bullets = this.bullets.filter(b => {
+            b.y -= b.speed;
+            return b.y > -20;
+        });
+        
+        // Enemy movement
+        let needDrop = false;
+        this.enemies.forEach(e => {
+            e.x += e.speed * e.direction;
+            if (e.x <= 5 || e.x >= canvas.width - e.width - 5) {
+                needDrop = true;
+            }
+        });
+        
+        if (needDrop) {
+            this.enemies.forEach(e => {
+                e.direction *= -1;
+                e.y += 15;
+            });
+        }
+        
+        // Enemy bullets
+        this.enemyBullets = this.enemyBullets.filter(b => {
+            b.y += b.speed;
+            return b.y < canvas.height + 10;
+        });
+        
+        // Collision: player bullets -> enemies
+        this.bullets.forEach((b, bi) => {
+            this.enemies.forEach((e, ei) => {
+                if (this.hit(b, e)) {
+                    e.health--;
+                    this.bullets.splice(bi, 1);
+                    
+                    // 타입별 폭발 색상
+                    const explosionColor = e.type === 'boss' ? '#22DD22' : 
+                                          e.type === 'elite' ? '#DD2222' : '#4444DD';
+                    this.createHitParticles(b.x, b.y, explosionColor);
+                    
+                    if (e.health <= 0) {
+                        this.score += e.points;
+                        this.createExplosion(e.x + e.width/2, e.y + e.height/2, explosionColor);
+                        this.enemies.splice(ei, 1);
+                        this.updateStats();
+                        
+                        if (this.enemies.length === 0) {
+                            this.stageClear();
+                        }
+                    }
+                }
+            });
+        });
+        
+        // Collision: enemy bullets -> player
+        this.enemyBullets.forEach((b, i) => {
+            if (this.hit(b, this.player)) {
+                this.enemyBullets.splice(i, 1);
+                this.playerHit();
+            }
+        });
+        
+        // Collision: enemies -> player
+        this.enemies.forEach(e => {
+            if (this.hit(e, this.player)) {
+                this.playerHit();
+            }
+            // Game over if enemies reach bottom
+            if (e.y > canvas.height - 80) {
+                this.gameOver();
+            }
+        });
+        
+        // Enemy shooting
+        const now = Date.now();
+        if (now - this.lastEnemyShot > this.enemyShotDelay && this.enemies.length > 0) {
+            const shooter = this.enemies[Math.floor(Math.random() * this.enemies.length)];
+            this.enemyBullets.push({
+                x: shooter.x + shooter.width / 2 - 3,
+                y: shooter.y + shooter.height,
+                width: 6,
+                height: 12,
+                speed: 4 + this.stage * 0.3
+            });
+            this.lastEnemyShot = now;
+        }
+        
+        // Update particles
+        this.particles = this.particles.filter(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.1;
+            p.life--;
+            return p.life > 0;
+        });
+    },
+    
+    /* ======================================================
+       DRAW EVERYTHING
+    ====================================================== */
+    draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw stars
+        this.stars.forEach(star => {
+            const flicker = 0.5 + Math.sin(this.frameCount * 0.1 + star.brightness * 10) * 0.5;
+            ctx.fillStyle = `rgba(255, 255, 255, ${flicker * 0.8})`;
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        
+        // Draw player spaceship
+        this.drawPlayer();
+        
+        // Draw player bullets
+        this.bullets.forEach(b => {
+            const gradient = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.height);
+            gradient.addColorStop(0, "#00ffff");
+            gradient.addColorStop(1, "#0088ff");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(b.x, b.y, b.width, b.height);
+            
+            // Glow effect
+            ctx.shadowColor = "#00ffff";
+            ctx.shadowBlur = 10;
+            ctx.fillRect(b.x, b.y, b.width, b.height);
+            ctx.shadowBlur = 0;
+        });
+        
+        // Draw enemies
+        this.enemies.forEach(e => {
+            this.drawEnemy(e);
+        });
+        
+        // Draw enemy bullets
+        this.enemyBullets.forEach(b => {
+            const gradient = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.height);
+            gradient.addColorStop(0, "#ff0066");
+            gradient.addColorStop(1, "#ff0000");
+            ctx.fillStyle = gradient;
+            ctx.fillRect(b.x, b.y, b.width, b.height);
+            
+            ctx.shadowColor = "#ff0066";
+            ctx.shadowBlur = 8;
+            ctx.fillRect(b.x, b.y, b.width, b.height);
+            ctx.shadowBlur = 0;
+        });
+        
+        // Draw particles
+        this.particles.forEach(p => {
+            ctx.globalAlpha = p.life / p.maxLife;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        });
+        
+        // Pause overlay
+        if (this.isPaused) {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00ffcc";
+            ctx.font = "bold 36px Courier New";
+            ctx.textAlign = "center";
+            ctx.fillText("PAUSED", canvas.width/2, canvas.height/2);
+            ctx.font = "16px Courier New";
+            ctx.fillText("Press P to continue", canvas.width/2, canvas.height/2 + 40);
+        }
+    },
+    
+    /* ======================================================
+       DRAW PLAYER SPACESHIP - Classic Galaga Style
+    ====================================================== */
+    drawPlayer() {
+        const p = this.player;
+        const px = Math.floor(p.x);
+        const py = Math.floor(p.y);
+        const scale = 2; // 픽셀 크기
+        
+        // 클래식 Galaga 우주선 픽셀 데이터
+        // 0=투명, 1=흰색, 2=빨간색, 3=파란색, 4=진한빨간색, 5=회색
+        const shipPixels = [
+            [0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,1,1,2,1,1,1,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,1,2,2,2,1,1,0,0,0,0,0,0],
+            [0,0,1,0,0,1,1,1,2,2,2,1,1,1,0,0,1,0,0],
+            [0,0,1,0,0,1,1,1,1,1,1,1,1,1,0,0,1,0,0],
+            [0,1,1,0,1,1,3,1,1,1,1,1,3,1,1,0,1,1,0],
+            [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+            [2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2],
+            [2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2],
+            [4,2,0,0,1,1,1,0,0,0,0,0,1,1,1,0,0,2,4],
+            [4,2,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,2,4],
+            [4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4],
+        ];
+        
+        const colors = {
+            0: null, // 투명
+            1: '#FFFFFF', // 흰색
+            2: '#FF4444', // 빨간색
+            3: '#4488FF', // 파란색
+            4: '#CC0000', // 진한 빨간색
+            5: '#AAAAAA'  // 회색
+        };
+        
+        // 엔진 불꽃 효과 (애니메이션)
+        const flameOffset = Math.sin(this.frameCount * 0.5) * 2;
+        const flameColors = ['#00FFFF', '#0088FF', '#0044AA'];
+        
+        // 왼쪽 엔진 불꽃
+        ctx.fillStyle = flameColors[this.frameCount % 3];
+        ctx.fillRect(px + 2 * scale, py + 16 * scale + flameOffset, 2 * scale, (4 + flameOffset) * scale);
+        ctx.fillStyle = flameColors[(this.frameCount + 1) % 3];
+        ctx.fillRect(px + 2.5 * scale, py + 17 * scale + flameOffset, 1 * scale, (5 + flameOffset) * scale);
+        
+        // 오른쪽 엔진 불꽃
+        ctx.fillStyle = flameColors[this.frameCount % 3];
+        ctx.fillRect(px + 15 * scale, py + 16 * scale + flameOffset, 2 * scale, (4 + flameOffset) * scale);
+        ctx.fillStyle = flameColors[(this.frameCount + 1) % 3];
+        ctx.fillRect(px + 15.5 * scale, py + 17 * scale + flameOffset, 1 * scale, (5 + flameOffset) * scale);
+        
+        // 우주선 본체 그리기
+        for (let row = 0; row < shipPixels.length; row++) {
+            for (let col = 0; col < shipPixels[row].length; col++) {
+                const colorIndex = shipPixels[row][col];
+                if (colorIndex !== 0) {
+                    ctx.fillStyle = colors[colorIndex];
+                    ctx.fillRect(
+                        px + col * scale,
+                        py + row * scale,
+                        scale,
+                        scale
+                    );
+                }
+            }
+        }
+        
+        // 글로우 효과
+        ctx.shadowColor = '#00FFFF';
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.1)';
+        ctx.fillRect(px, py, 19 * scale, 16 * scale);
+        ctx.shadowBlur = 0;
+    },
+    
+    /* ======================================================
+       DRAW ENEMY - Classic Galaga Pixel Art Style
+    ====================================================== */
+    drawEnemy(e) {
+        const px = Math.floor(e.x);
+        const py = Math.floor(e.y);
+        const scale = 2;
+        const wobble = Math.sin(this.frameCount * 0.1 + e.animOffset) * 1;
+        
+        ctx.save();
+        
+        // 픽셀 데이터: 0=투명, 1=메인색, 2=보조색, 3=하이라이트, 4=눈/포인트
+        let pixels, colors;
+        
+        if (e.type === "boss") {
+            // 🟢 초록색 보스 (Galaga 보스 외계인 - 날개 펼친 곤충)
+            pixels = [
+                [0,0,0,0,0,0,0,0,2,2,2,0,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,0,2,1,1,1,2,0,0,0,0,0,0,0],
+                [0,0,1,1,0,0,2,1,1,1,1,1,2,0,0,1,1,0,0],
+                [0,1,2,2,1,0,1,1,1,1,1,1,1,0,1,2,2,1,0],
+                [1,2,2,2,2,1,1,4,1,1,1,4,1,1,2,2,2,2,1],
+                [1,2,1,1,2,2,1,1,1,1,1,1,1,2,2,1,1,2,1],
+                [1,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,2,1],
+                [1,1,2,1,1,1,1,1,3,3,3,1,1,1,1,1,2,1,1],
+                [0,1,1,2,1,1,1,3,3,3,3,3,1,1,1,2,1,1,0],
+                [0,0,1,1,2,1,1,3,1,1,1,3,1,1,2,1,1,0,0],
+                [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
+                [0,0,0,0,1,1,0,1,1,1,1,1,0,1,1,0,0,0,0],
+                [0,0,0,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,0],
+                [0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0],
+            ];
+            colors = {
+                0: null,
+                1: '#00CC00', // 초록
+                2: '#00FF44', // 밝은 초록
+                3: '#88FF88', // 하이라이트
+                4: '#FFFFFF'  // 흰색 눈
+            };
+        } else if (e.type === "elite") {
+            // 🔴 빨간색 나비 외계인
+            pixels = [
+                [0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0],
+                [0,0,0,0,0,0,1,2,2,2,1,0,0,0,0,0,0],
+                [0,0,0,0,0,1,2,2,2,2,2,1,0,0,0,0,0],
+                [0,1,1,0,1,2,2,4,2,4,2,2,1,0,1,1,0],
+                [1,2,2,1,1,2,2,2,2,2,2,2,1,1,2,2,1],
+                [1,2,2,2,1,2,2,2,2,2,2,2,1,2,2,2,1],
+                [1,1,2,2,1,1,2,2,2,2,2,1,1,2,2,1,1],
+                [0,1,1,2,2,1,1,2,2,2,1,1,2,2,1,1,0],
+                [0,0,1,1,3,3,1,1,1,1,1,3,3,1,1,0,0],
+                [0,0,0,1,3,3,3,1,1,1,3,3,3,1,0,0,0],
+                [0,0,0,0,1,3,3,0,1,0,3,3,1,0,0,0,0],
+                [0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0],
+            ];
+            colors = {
+                0: null,
+                1: '#CC0000', // 빨강
+                2: '#FF3333', // 밝은 빨강
+                3: '#FFAA00', // 주황/노랑 (날개 무늬)
+                4: '#FFFF00'  // 노란 눈
+            };
+        } else {
+            // 🔵🟡 파란색/노란색 벌 외계인 (번갈아)
+            const isYellow = e.animOffset > Math.PI;
+            pixels = [
+                [0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],
+                [0,0,0,0,1,2,1,0,1,2,1,0,0,0,0],
+                [0,0,0,0,1,2,1,0,1,2,1,0,0,0,0],
+                [0,0,0,0,0,1,1,1,1,1,0,0,0,0,0],
+                [0,0,0,0,1,2,2,2,2,2,1,0,0,0,0],
+                [0,0,0,1,2,4,2,2,2,4,2,1,0,0,0],
+                [0,0,0,1,2,2,2,2,2,2,2,1,0,0,0],
+                [0,1,1,1,2,2,2,2,2,2,2,1,1,1,0],
+                [1,3,3,1,1,2,2,2,2,2,1,1,3,3,1],
+                [1,3,3,3,1,1,2,2,2,1,1,3,3,3,1],
+                [0,1,3,3,1,1,1,1,1,1,1,3,3,1,0],
+                [0,0,1,1,0,0,1,1,1,0,0,1,1,0,0],
+                [0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],
+            ];
+            if (isYellow) {
+                colors = {
+                    0: null,
+                    1: '#CC8800', // 주황/갈색
+                    2: '#FFCC00', // 노랑
+                    3: '#FF8800', // 주황
+                    4: '#FFFFFF'  // 흰색 눈
+                };
+            } else {
+                colors = {
+                    0: null,
+                    1: '#2222AA', // 파랑
+                    2: '#4466FF', // 밝은 파랑
+                    3: '#FFAA00', // 주황 (날개)
+                    4: '#FFFFFF'  // 흰색 눈
+                };
+            }
+        }
+        
+        // 외계인 그리기
+        const offsetX = px - (pixels[0].length * scale) / 2 + e.width / 2;
+        const offsetY = py + wobble;
+        
+        for (let row = 0; row < pixels.length; row++) {
+            for (let col = 0; col < pixels[row].length; col++) {
+                const colorIndex = pixels[row][col];
+                if (colorIndex !== 0) {
+                    ctx.fillStyle = colors[colorIndex];
+                    ctx.fillRect(
+                        offsetX + col * scale,
+                        offsetY + row * scale,
+                        scale,
+                        scale
+                    );
+                }
+            }
+        }
+        
+        // 피격 시 깜빡임 효과
+        if (e.health < e.maxHealth) {
+            if (this.frameCount % 4 < 2) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.fillRect(offsetX, offsetY, pixels[0].length * scale, pixels.length * scale);
+            }
+            
+            // 체력바
+            const barWidth = e.width;
+            const barHeight = 3;
+            ctx.fillStyle = '#333';
+            ctx.fillRect(px, py - 6, barWidth, barHeight);
+            ctx.fillStyle = e.type === 'boss' ? '#00FF00' : '#FF0000';
+            ctx.fillRect(px, py - 6, barWidth * (e.health / e.maxHealth), barHeight);
+        }
+        
+        ctx.restore();
+    },
+    
+    /* ======================================================
+       EFFECTS
+    ====================================================== */
+    createExplosion(x, y, color) {
+        for (let i = 0; i < 20; i++) {
+            const angle = (Math.PI * 2 / 20) * i + Math.random() * 0.5;
+            const speed = 2 + Math.random() * 3;
+            this.particles.push({
+                x, y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                size: 2 + Math.random() * 3,
+                color: color,
+                life: 30 + Math.random() * 20,
+                maxLife: 50
+            });
+        }
+        // Add some white sparks
+        for (let i = 0; i < 10; i++) {
+            this.particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 6,
+                vy: (Math.random() - 0.5) * 6,
+                size: 1 + Math.random() * 2,
+                color: "#ffffff",
+                life: 15 + Math.random() * 10,
+                maxLife: 25
+            });
+        }
+    },
+    
+    createHitParticles(x, y, color) {
+        for (let i = 0; i < 5; i++) {
+            this.particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 4,
+                vy: (Math.random() - 0.5) * 4,
+                size: 2,
+                color: color,
+                life: 15,
+                maxLife: 15
+            });
+        }
+    },
+    
+    /* ======================================================
+       UTILITY
+    ====================================================== */
+    hit(a, b) {
+        return a.x < b.x + b.width &&
+               a.x + a.width > b.x &&
+               a.y < b.y + b.height &&
+               a.y + a.height > b.y;
+    },
+    
+    playerHit() {
+        this.lives--;
+        this.createExplosion(this.player.x + this.player.width/2, this.player.y + this.player.height/2, "#00ffff");
+        this.updateStats();
+        
+        if (this.lives <= 0) {
+            this.gameOver();
+        } else {
+            // Brief invulnerability flash
+            this.player.x = canvas.width / 2 - 19;
+        }
+    },
+    
+    updateStats() {
+        document.getElementById("score").textContent = this.score.toLocaleString();
+        document.getElementById("stage").textContent = this.stage;
+        document.getElementById("lives").textContent = "❤️".repeat(Math.max(0, this.lives));
+    },
+    
+    togglePause() {
+        if (!this.isRunning) return;
+        this.isPaused = !this.isPaused;
+    },
+    
+    /* ======================================================
+       GAME STATE CHANGES
+    ====================================================== */
+    stageClear() {
+        if (this.stage >= this.maxStage) {
+            // Game complete!
+            this.gameComplete();
+            return;
+        }
+        
+        this.stage++;
+        this.isPaused = true;
+        
+        document.getElementById("stageClearScreen").classList.add("show");
+        
+        setTimeout(() => {
+            document.getElementById("stageClearScreen").classList.remove("show");
+            this.isPaused = false;
+            this.createEnemies();
+            this.updateStats();
+        }, 2000);
+    },
+    
+    async gameOver() {
+        this.isRunning = false;
+        
+        await window.saveScore(this.score, this.stage, this.playerName, this.studentId);
+        
+        document.getElementById("finalScore").textContent = this.score.toLocaleString();
+        document.getElementById("finalStage").textContent = this.stage;
+        document.getElementById("gameOverScreen").classList.add("show");
+    },
+    
+    async gameComplete() {
+        this.isRunning = false;
+        
+        // Bonus points for completion
+        this.score += 1000;
+        
+        await window.saveScore(this.score, this.stage, this.playerName, this.studentId);
+        
+        document.getElementById("victoryScore").textContent = this.score.toLocaleString();
+        document.getElementById("gameCompleteScreen").classList.add("show");
+    }
+};
+
+// Initialize game
+game.init();
+
+// Start screen handler
+document.getElementById("btnStart").addEventListener("click", () => {
+    const studentId = document.getElementById("studentIdInput").value.trim();
+    const playerName = document.getElementById("playerNameInput").value.trim();
+    
+    let valid = true;
+    
+    if (!studentId) {
+        document.getElementById("idError").style.display = "block";
+        valid = false;
+    } else {
+        document.getElementById("idError").style.display = "none";
+    }
+    
+    if (!playerName) {
+        document.getElementById("nameError").style.display = "block";
+        valid = false;
+    } else {
+        document.getElementById("nameError").style.display = "none";
+    }
+    
+    if (!valid) return;
+    
+    game.studentId = studentId;
+    game.playerName = playerName;
+    
+    document.getElementById("startScreen").classList.remove("show");
+    game.start();
+});
+
+// Enter key support
+document.getElementById("studentIdInput").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") document.getElementById("playerNameInput").focus();
+});
+document.getElementById("playerNameInput").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") document.getElementById("btnStart").click();
+});
+</script>
 
 </body>
 </html>
