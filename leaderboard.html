@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Galaga Leaderboard</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+    <div class="lb-container">
+
+        <!-- =====================================================
+             HEADER
+        ====================================================== -->
+
+        <div class="lb-header">
+            <h1 class="lb-title">🏆 GALAGA LEADERBOARD 🏆</h1>
+            <p style="color:#0ff; margin-top:5px;">Realtime Ranking System</p>
+        </div>
+
+        <!-- =====================================================
+             FILTER TABS
+        ====================================================== -->
+        <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+            <div class="filter-tab active" data-filter="all" onclick="applyFilter('all')">All Scores</div>
+            <div class="filter-tab" data-filter="top" onclick="applyFilter('top')">Top 10</div>
+            <div class="filter-tab" data-filter="stage10" onclick="applyFilter('stage10')">Stage 10+</div>
+            <div class="filter-tab" data-filter="today" onclick="applyFilter('today')">Today</div>
+        </div>
+
+        <!-- =====================================================
+             SEARCH & BUTTONS
+        ====================================================== -->
+        <div style="margin-top:20px; display:flex; gap:15px; flex-wrap:wrap; align-items:center;">
+            <input id="searchBox" class="search-box" placeholder="🔍 Search by Name or Student ID" />
+
+            <button class="btn" onclick="loadLeaderboard()">Refresh</button>
+            <button class="btn btn-secondary" onclick="exportCSV()">Export CSV</button>
+        </div>
+
+        <!-- =====================================================
+             LEADERBOARD TABLE
+        ====================================================== -->
+        <div class="table-container" style="margin-top:20px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-col="rank" onclick="applySort('rank')">Rank</th>
+                        <th data-col="studentId" onclick="applySort('studentId')">Student ID</th>
+                        <th data-col="name" onclick="applySort('name')">Name</th>
+                        <th data-col="score" onclick="applySort('score')">Score</th>
+                        <th data-col="stage" onclick="applySort('stage')">Stage</th>
+                        <th data-col="date" onclick="applySort('date')">Date</th>
+                    </tr>
+                </thead>
+
+                <tbody id="leaderboardBody">
+                    <tr><td colspan="6" class="loading">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- =====================================================
+             HOME BUTTON
+        ====================================================== -->
+        <div style="text-align:center; margin-top:30px;">
+            <button class="btn" onclick="window.location='index.html'">Back to Game</button>
+        </div>
+
+    </div>
+
+    <!-- =====================================================
+         SCRIPTS
+    ====================================================== -->
+
+    <!-- Firebase Module -->
+    <script src="assets/js/firebase.js" type="module"></script>
+
+    <!-- Leaderboard Engine -->
+    <script src="assets/js/leaderboard.js"></script>
+
+</body>
+</html>
