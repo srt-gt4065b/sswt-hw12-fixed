@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Galaga Game</title>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+    <!-- =====================================================
+         START SCREEN
+    ====================================================== -->
+    <div id="startScreen" class="screen-overlay">
+        <div class="screen-content">
+            <h2 class="screen-title">🚀 GALAGA 🚀</h2>
+
+            <div class="form-group">
+                <label class="form-label">Student ID</label>
+                <input id="studentIdInput" class="form-input" placeholder="ex) 20241234" />
+                <div id="idError" class="error-message">Please enter your student ID.</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input id="playerNameInput" class="form-input" placeholder="ex) Kim Daniel" />
+                <div id="nameError" class="error-message">Please enter your name.</div>
+            </div>
+
+            <button id="btnStart" class="btn" style="width:100%;margin-top:10px">
+                Start Game
+            </button>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         STAGE CLEAR SCREEN
+    ====================================================== -->
+    <div id="stageClearScreen" class="screen-overlay hidden">
+        <div class="screen-content">
+            <h2 class="screen-title">Stage Clear!</h2>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         GAME OVER SCREEN
+    ====================================================== -->
+    <div id="gameOverScreen" class="screen-overlay hidden">
+        <div class="screen-content">
+            <h2 class="screen-title">GAME OVER</h2>
+            <p style="font-size:20px">
+                Score: <span id="finalScore">0</span>
+            </p>
+
+            <button onclick="window.location='leaderboard.html'" class="btn" style="width:100%;margin-top:20px">
+                View Leaderboard
+            </button>
+
+            <button onclick="window.location.reload()" class="btn btn-secondary" style="width:100%;margin-top:10px">
+                Play Again
+            </button>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         GAME UI
+    ====================================================== -->
+
+    <div class="game-container">
+
+        <div class="game-header">
+            <div class="game-title">GALAGA</div>
+            <div class="game-subtitle">Space Monster Defense</div>
+        </div>
+
+        <div class="game-stats">
+            <div class="stat">Score: <span id="score">0</span></div>
+            <div class="stat">Stage: <span id="stage">1</span></div>
+            <div class="stat">Lives: <span id="lives">❤️❤️❤️</span></div>
+            <div class="stat">High Score: <span id="highScore">0</span></div>
+        </div>
+
+        <canvas id="gameCanvas" width="360" height="480"></canvas>
+
+        <div class="controls">
+            <button onclick="game.togglePause()" class="btn">Pause</button>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         MOBILE CONTROLS
+    ====================================================== -->
+    <div id="mobileControls">
+        <div class="mobile-controls-inner">
+
+            <div class="dpad">
+                <div></div>
+                <button id="btnUp" class="dpad-btn">▲</button>
+                <div></div>
+
+                <button id="btnLeft" class="dpad-btn">◀</button>
+                <div></div>
+                <button id="btnRight" class="dpad-btn">▶</button>
+
+                <div></div>
+                <button id="btnDown" class="dpad-btn">▼</button>
+                <div></div>
+            </div>
+
+            <button id="btnFire" class="fire-btn">FIRE</button>
+
+            <button onclick="game.togglePause()" class="pause-btn-mobile">Pause</button>
+        </div>
+    </div>
+
+    <!-- =====================================================
+         SCRIPTS
+    ====================================================== -->
+
+    <script src="assets/js/firebase.js" type="module"></script>
+    <script src="assets/js/game.js"></script>
+
+    <script>
+        // Start Screen → Game Start Logic
+        document.getElementById("btnStart").addEventListener("click", () => {
+            const studentId = document.getElementById("studentIdInput").value.trim();
+            const playerName = document.getElementById("playerNameInput").value.trim();
+
+            let valid = true;
+
+            if (!studentId) {
+                document.getElementById("idError").style.display = "block";
+                valid = false;
+            } else {
+                document.getElementById("idError").style.display = "none";
+            }
+
+            if (!playerName) {
+                document.getElementById("nameError").style.display = "block";
+                valid = false;
+            } else {
+                document.getElementById("nameError").style.display = "none";
+            }
+
+            if (!valid) return;
+
+            game.studentId = studentId;
+            game.playerName = playerName;
+
+            document.getElementById("startScreen").classList.add("hidden");
+            game.start();
+        });
+    </script>
+
+</body>
+</html>
