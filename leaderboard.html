@@ -3,29 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏆 Leaderboard</title>
+    <title>🏆 GALAGA Leaderboard</title>
+
     <style>
         body {
             background: #0a0a1a;
             color: #fff;
             font-family: Arial, sans-serif;
             padding: 25px;
+            text-align: center;
         }
         h1 {
-            text-align: center;
             color: #00ffcc;
             text-shadow: 0 0 10px #00ffcc;
+            margin-bottom: 10px;
+        }
+        .subtitle {
             margin-bottom: 20px;
+            color: #ff00ff;
+            font-size: 15px;
+            text-shadow: 0 0 8px #ff00ff;
         }
         table {
             width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
             border-collapse: collapse;
-            margin-top: 15px;
             background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
         }
         th, td {
-            padding: 10px;
-            text-align: center;
+            padding: 12px;
             border-bottom: 1px solid rgba(255,255,255,0.15);
         }
         th {
@@ -33,20 +42,18 @@
             color: #00ffcc;
         }
         tr:hover {
-            background: rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.07);
         }
         .btn {
-            display: block;
-            margin: 20px auto;
-            width: 200px;
-            padding: 12px;
+            margin-top: 20px;
+            padding: 12px 25px;
             background: #00ffcc;
             color: #000;
-            border-radius: 8px;
             border: none;
-            cursor: pointer;
+            border-radius: 8px;
             font-weight: bold;
-            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
         }
         .btn:hover {
             background: #00ffaa;
@@ -56,6 +63,7 @@
 <body>
 
 <h1>🏆 GALAGA Leaderboard</h1>
+<p class="subtitle">Woosong University · AI Management</p>
 
 <table>
     <thead>
@@ -75,13 +83,15 @@
 
 <button class="btn" onclick="location.href='index.html'">🎮 Back to Game</button>
 
+
+<!-- ============================================================
+     Firebase + Leaderboard JS
+============================================================ -->
 <script type="module">
-/* ============================================================
-   🔥 Firebase 초기화
-============================================================ */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+/* ----- Firebase Config ----- */
 const firebaseConfig = {
     apiKey: "AIzaSyDKHFod7Hr8qeUgUb052Ir3DCxF0ZRb6To",
     authDomain: "sswt2025fall.firebaseapp.com",
@@ -96,36 +106,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ============================================================
-   🏆 Leaderboard 불러오기
-============================================================ */
+
+/* ===== Leaderboard Rendering Function ===== */
 const tbody = document.getElementById("leaderboardBody");
 
-// Firebase “scores” 경로에서 전체 데이터 읽기
-const scoresRef = ref(db, "scores");
-
-onValue(scoresRef, (snapshot) => {
-    if (!snapshot.exists()) {
+function renderRows(rows) {
+    if (!rows.length) {
         tbody.innerHTML = `<tr><td colspan="6">No scores yet</td></tr>`;
         return;
     }
 
-    const data = snapshot.val();
-    const arr = Object.values(data);
-
-    // 💡 최신 → 최고 점수 순으로 정렬 (정확한 순위 보장)
-    arr.sort((a, b) => {
-        if (b.score === a.score) {
-            return b.timestamp - a.timestamp;
-        }
-        return b.score - a.score;
-    });
-
-    // HTML 렌더링
     tbody.innerHTML = "";
-    arr.forEach((item, index) => {
-        const dateStr = new Date(item.timestamp).toLocaleString("ko-KR");
-
+    rows.forEach((item, index) => {
+        const date = new Date(item.timestamp).toLocaleString("ko-KR");
         tbody.innerHTML += `
             <tr>
                 <td>${index + 1}</td>
@@ -133,11 +126,40 @@ onValue(scoresRef, (snapshot) => {
                 <td>${item.playerName}</td>
                 <td>${item.score.toLocaleString()}</td>
                 <td>${item.stage}</td>
-                <td>${dateStr}</td>
+                <td>${date}</td>
             </tr>
         `;
     });
+}
 
+
+/* ============================================================
+   Load Firebase + Local Backup and Merge
+============================================================ */
+onValue(ref(db, "scores"), (snapshot) => {
+    let cloud = [];
+    if (snapshot.exists()) {
+        cloud = Object.values(snapshot.val());
+    }
+
+    // LocalStorage backup
+    const local = JSON.parse(localStorage.getItem("galagaScores") || "[]");
+
+    // Merge
+    let merged = [...cloud, ...local];
+
+    // Duplicate removal
+    const map = {};
+    merged.forEach((v) => map[`${v.studentId}-${v.score}-${v.timestamp}`] = v);
+    merged = Object.values(map);
+
+    // Sort by score DESC, tie → timestamp DESC
+    merged.sort((a, b) => {
+        if (b.score === a.score) return b.timestamp - a.timestamp;
+        return b.score - a.score;
+    });
+
+    renderRows(merged);
 });
 </script>
 
