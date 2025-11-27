@@ -81,6 +81,9 @@
     </tbody>
 </table>
 
+<!-- NEW: CSV DOWNLOAD BUTTON -->
+<button class="btn" onclick="downloadCSV()">📥 Download CSV</button>
+
 <button class="btn" onclick="location.href='index.html'">🎮 Back to Game</button>
 
 
@@ -109,6 +112,7 @@ const db = getDatabase(app);
 
 /* ===== Leaderboard Rendering Function ===== */
 const tbody = document.getElementById("leaderboardBody");
+let fullMergedData = [];  // CSV 다운로드용 저장 변수
 
 function renderRows(rows) {
     if (!rows.length) {
@@ -131,7 +135,6 @@ function renderRows(rows) {
         `;
     });
 }
-
 
 /* ============================================================
    Load Firebase + Local Backup and Merge
@@ -159,8 +162,35 @@ onValue(ref(db, "scores"), (snapshot) => {
         return b.score - a.score;
     });
 
+    fullMergedData = merged;   // CSV도 이 데이터를 사용
     renderRows(merged);
 });
+
+/* ============================================================
+   CSV DOWNLOAD FUNCTION (NEW)
+============================================================ */
+window.downloadCSV = function () {
+    if (!fullMergedData.length) {
+        alert("No data available.");
+        return;
+    }
+
+    let csv = "Rank,Student ID,Name,Score,Stage,Date\n";
+
+    fullMergedData.forEach((v, index) => {
+        const date = new Date(v.timestamp).toLocaleString("ko-KR");
+        csv += `${index + 1},${v.studentId},${v.playerName},${v.score},${v.stage},${date}\n`;
+    });
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "galaga_leaderboard.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+};
 </script>
 
 </body>
