@@ -1,808 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🏆 GALAGA Leaderboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Leaderboard</title>
     <style>
-/* ============================================================
-   GLOBAL RESET & BASE
-============================================================ */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2a 100%);
-    color: #fff;
-    font-family: 'Courier New', monospace;
-    min-height: 100vh;
-    padding: 20px;
-}
-
-/* ============================================================
-   LEADERBOARD CONTAINER
-============================================================ */
-.lb-container {
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-/* ============================================================
-   HEADER
-============================================================ */
-.lb-header {
-    text-align: center;
-    padding: 30px;
-    background: linear-gradient(180deg, rgba(0,20,40,0.95) 0%, rgba(10,10,30,0.98) 100%);
-    border: 3px solid #00ff88;
-    border-radius: 15px;
-    box-shadow: 
-        0 0 30px rgba(0,255,136,0.3),
-        0 0 60px rgba(0,255,136,0.1);
-    margin-bottom: 25px;
-}
-
-.lb-title {
-    font-size: 42px;
-    color: #00ffcc;
-    letter-spacing: 5px;
-    text-shadow: 
-        0 0 10px #00ffcc,
-        0 0 20px #00ffcc,
-        0 0 40px #00ffcc;
-    animation: titleGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes titleGlow {
-    from { text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc; }
-    to { text-shadow: 0 0 20px #00ffcc, 0 0 40px #00ffcc, 0 0 60px #ff00ff; }
-}
-
-@keyframes neonGlow {
-    from { text-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 40px #00ff88; }
-    to { text-shadow: 0 0 20px #00ff88, 0 0 40px #00ff88, 0 0 60px #00ff88, 0 0 80px #00ffcc; }
-}
-
-@keyframes strongNeon {
-    0% { 
-        text-shadow: 0 0 5px #fff, 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 40px #00ff88, 0 0 60px #00ff88, 0 0 80px #00ff88, 0 0 100px #00ff88;
-        filter: brightness(1);
-    }
-    50% { 
-        text-shadow: 0 0 10px #fff, 0 0 20px #00ffcc, 0 0 40px #00ffcc, 0 0 80px #00ffcc, 0 0 120px #00ffcc, 0 0 150px #ff00ff;
-        filter: brightness(1.2);
-    }
-    100% { 
-        text-shadow: 0 0 5px #fff, 0 0 15px #00ff88, 0 0 30px #00ff88, 0 0 60px #00ff88, 0 0 100px #00ff88, 0 0 140px #00ffcc;
-        filter: brightness(1.1);
-    }
-}
-
-.lb-subtitle {
-    color: #ff00ff;
-    margin-top: 10px;
-    font-size: 14px;
-    letter-spacing: 3px;
-    text-shadow: 0 0 10px #ff00ff;
-}
-
-.status-indicator {
-    display: inline-block;
-    margin-top: 15px;
-    padding: 5px 15px;
-    border-radius: 20px;
-    font-size: 12px;
-}
-
-.status-online {
-    background: rgba(0,255,136,0.2);
-    border: 1px solid #00ff88;
-    color: #00ff88;
-}
-
-.status-offline {
-    background: rgba(255,100,100,0.2);
-    border: 1px solid #ff6666;
-    color: #ff6666;
-}
-
-/* ============================================================
-   FILTER TABS
-============================================================ */
-.filter-container {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
-}
-
-.filter-tab {
-    padding: 12px 20px;
-    background: rgba(0,255,136,0.1);
-    border: 2px solid rgba(0,255,136,0.3);
-    border-radius: 8px;
-    color: #888;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 13px;
-    font-family: 'Courier New', monospace;
-}
-
-.filter-tab:hover {
-    border-color: #00ff88;
-    color: #00ff88;
-    background: rgba(0,255,136,0.15);
-}
-
-.filter-tab.active {
-    background: rgba(0,255,136,0.2);
-    border-color: #00ff88;
-    color: #00ff88;
-    box-shadow: 0 0 15px rgba(0,255,136,0.3);
-}
-
-/* ============================================================
-   SEARCH & CONTROLS
-============================================================ */
-.controls-row {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.search-box {
-    flex: 1;
-    min-width: 200px;
-    padding: 12px 15px;
-    background: rgba(0,255,136,0.05);
-    border: 2px solid rgba(0,255,136,0.3);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 14px;
-    font-family: 'Courier New', monospace;
-    transition: all 0.2s;
-}
-
-.search-box:focus {
-    outline: none;
-    border-color: #00ff88;
-    background: rgba(0,255,136,0.1);
-    box-shadow: 0 0 20px rgba(0,255,136,0.2);
-}
-
-.search-box::placeholder {
-    color: #666;
-}
-
-.btn {
-    background: linear-gradient(180deg, #ffcc00 0%, #ff9900 100%);
-    color: #000;
-    border: none;
-    padding: 12px 20px;
-    font-size: 13px;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Courier New', monospace;
-    box-shadow: 
-        0 4px 0 #cc7700,
-        0 0 15px rgba(255,204,0,0.3);
-    transition: all 0.1s;
-    text-transform: uppercase;
-}
-
-.btn:hover {
-    box-shadow: 
-        0 4px 0 #cc7700,
-        0 0 25px rgba(255,204,0,0.5);
-}
-
-.btn:active {
-    transform: translateY(4px);
-    box-shadow: 0 0 15px rgba(255,204,0,0.3);
-}
-
-.btn-secondary {
-    background: linear-gradient(180deg, #00aa88 0%, #008866 100%);
-    color: #fff;
-    box-shadow: 
-        0 4px 0 #005544,
-        0 0 15px rgba(0,170,136,0.3);
-}
-
-/* ============================================================
-   TABLE
-============================================================ */
-.table-container {
-    background: linear-gradient(180deg, rgba(0,20,40,0.95) 0%, rgba(10,10,30,0.98) 100%);
-    border: 3px solid #00ff88;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 0 30px rgba(0,255,136,0.2);
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    padding: 15px 12px;
-    text-align: left;
-    color: #00ffcc;
-    font-size: 14px;
-    letter-spacing: 1px;
-    border-bottom: 2px solid #00ff88;
-    cursor: pointer;
-    user-select: none;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-th:hover {
-    color: #ffcc00;
-    text-shadow: 0 0 10px #ffcc00;
-}
-
-th.sort-asc::after {
-    content: " ▲";
-    color: #ffcc00;
-}
-
-th.sort-desc::after {
-    content: " ▼";
-    color: #ffcc00;
-}
-
-td {
-    padding: 12px;
-    border-bottom: 1px solid rgba(0,255,136,0.1);
-    font-size: 14px;
-}
-
-tbody tr {
-    transition: all 0.2s;
-}
-
-tbody tr:hover {
-    background: rgba(0,255,136,0.08);
-}
-
-/* Rank styling */
-.rank-1 {
-    color: #ffd700 !important;
-    font-weight: bold;
-    font-size: 18px;
-    text-shadow: 0 0 10px #ffd700;
-}
-
-.rank-2 {
-    color: #c0c0c0 !important;
-    font-weight: bold;
-    font-size: 16px;
-    text-shadow: 0 0 8px #c0c0c0;
-}
-
-.rank-3 {
-    color: #cd7f32 !important;
-    font-weight: bold;
-    font-size: 16px;
-    text-shadow: 0 0 8px #cd7f32;
-}
-
-.student-id {
-    color: #888;
-    font-family: monospace;
-}
-
-.score {
-    color: #ffcc00;
-    font-weight: bold;
-    text-shadow: 0 0 5px rgba(255,204,0,0.5);
-}
-
-.stage-complete {
-    color: #00ff88;
-    font-weight: bold;
-}
-
-/* Loading & Empty states */
-.loading, .no-data {
-    text-align: center;
-    padding: 40px;
-    color: #666;
-    font-size: 16px;
-}
-
-.loading {
-    color: #00ffcc;
-}
-
-.loading::after {
-    content: "";
-    animation: dots 1.5s infinite;
-}
-
-@keyframes dots {
-    0%, 20% { content: "."; }
-    40% { content: ".."; }
-    60%, 100% { content: "..."; }
-}
-
-/* ============================================================
-   STATS CARDS
-============================================================ */
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
-    margin-bottom: 25px;
-}
-
-.stat-card {
-    background: rgba(0,255,136,0.05);
-    border: 2px solid rgba(0,255,136,0.2);
-    border-radius: 10px;
-    padding: 15px;
-    text-align: center;
-}
-
-.stat-card-value {
-    font-size: 28px;
-    color: #00ffcc;
-    font-weight: bold;
-    text-shadow: 0 0 10px rgba(0,255,204,0.5);
-}
-
-.stat-card-label {
-    font-size: 11px;
-    color: #888;
-    margin-top: 5px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* ============================================================
-   BACK BUTTON
-============================================================ */
-.back-section {
-    text-align: center;
-    margin-top: 30px;
-}
-
-/* ============================================================
-   RESPONSIVE
-============================================================ */
-@media (max-width: 600px) {
-    .lb-title {
-        font-size: 28px;
-        letter-spacing: 2px;
-    }
-    
-    th, td {
-        padding: 8px 6px;
-        font-size: 12px;
-    }
-    
-    .filter-tab {
-        padding: 10px 15px;
-        font-size: 12px;
-    }
-    
-    .stats-row {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
+        body {
+            background: #0a0a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 25px;
+        }
+        h1 {
+            text-align: center;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(255,255,255,0.05);
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+        th {
+            background: rgba(0,255,150,0.2);
+            color: #00ffcc;
+        }
+        tr:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .btn {
+            display: block;
+            margin: 20px auto;
+            width: 200px;
+            padding: 12px;
+            background: #00ffcc;
+            color: #000;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #00ffaa;
+        }
     </style>
 </head>
 <body>
 
-<div class="lb-container">
-    <!-- =====================================================
-         HEADER
-    ====================================================== -->
-    <div class="lb-header">
-        <div style="color:#00ff88; font-size:20px; font-weight:bold; letter-spacing:4px; margin-bottom:12px; text-shadow: 0 0 5px #fff, 0 0 10px #00ff88, 0 0 20px #00ff88, 0 0 40px #00ff88, 0 0 60px #00ff88, 0 0 80px #00ff88, 0 0 100px #00ff88; animation: strongNeon 1.5s ease-in-out infinite alternate;">Woosong AI Management</div>
-        <h1 class="lb-title">🏆 GALAGA LEADERBOARD 🏆</h1>
-        <p class="lb-subtitle">REALTIME RANKING SYSTEM</p>
-        <div id="connectionStatus" class="status-indicator status-offline">
-            ⏳ Connecting...
-        </div>
-    </div>
+<h1>🏆 GALAGA Leaderboard</h1>
 
-    <!-- =====================================================
-         STATS CARDS
-    ====================================================== -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-card-value" id="totalPlayers">-</div>
-            <div class="stat-card-label">Total Players</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-card-value" id="highestScore">-</div>
-            <div class="stat-card-label">Highest Score</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-card-value" id="stage10Count">-</div>
-            <div class="stat-card-label">Stage 10 Cleared</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-card-value" id="todayCount">-</div>
-            <div class="stat-card-label">Today's Games</div>
-        </div>
-    </div>
+<table>
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Score</th>
+            <th>Stage</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody id="leaderboardBody">
+        <tr><td colspan="6">Loading...</td></tr>
+    </tbody>
+</table>
 
-    <!-- =====================================================
-         FILTER TABS
-    ====================================================== -->
-    <div class="filter-container">
-        <div class="filter-tab active" data-filter="all" onclick="applyFilter('all')">📊 All Scores</div>
-        <div class="filter-tab" data-filter="top" onclick="applyFilter('top')">🏅 Top 10</div>
-        <div class="filter-tab" data-filter="stage10" onclick="applyFilter('stage10')">⭐ Stage 10+</div>
-        <div class="filter-tab" data-filter="today" onclick="applyFilter('today')">📅 Today</div>
-    </div>
+<button class="btn" onclick="location.href='index.html'">🎮 Back to Game</button>
 
-    <!-- =====================================================
-         SEARCH & BUTTONS
-    ====================================================== -->
-    <div class="controls-row">
-        <input id="searchBox" class="search-box" placeholder="🔍 Search by Name or Student ID..." />
-        <button class="btn" onclick="loadLeaderboard()">🔄 Refresh</button>
-        <button class="btn btn-secondary" onclick="exportCSV()">📥 Export CSV</button>
-    </div>
-
-    <!-- =====================================================
-         LEADERBOARD TABLE
-    ====================================================== -->
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th data-col="rank" onclick="applySort('rank')">Rank</th>
-                    <th data-col="studentId" onclick="applySort('studentId')">Student ID</th>
-                    <th data-col="name" onclick="applySort('name')">Name</th>
-                    <th data-col="score" onclick="applySort('score')">Score</th>
-                    <th data-col="stage" onclick="applySort('stage')">Stage</th>
-                    <th data-col="date" onclick="applySort('date')">Date</th>
-                </tr>
-            </thead>
-            <tbody id="leaderboardBody">
-                <tr><td colspan="6" class="loading">Loading leaderboard</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- =====================================================
-         BACK BUTTON
-    ====================================================== -->
-    <div class="back-section">
-        <button class="btn" onclick="window.location='index.html'">🎮 Back to Game</button>
-    </div>
-</div>
-
-<!-- =====================================================
-     SCRIPTS
-====================================================== -->
 <script type="module">
 /* ============================================================
-   Firebase Configuration
+   🔥 Firebase 초기화
 ============================================================ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
 const firebaseConfig = {
     apiKey: "AIzaSyDKHFod7Hr8qeUgUb052Ir3DCxF0ZRb6To",
-  authDomain: "sswt2025fall.firebaseapp.com",
-  databaseURL: "https://sswt2025fall-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "sswt2025fall",
-  storageBucket: "sswt2025fall.firebasestorage.app",
-  messagingSenderId: "304733564282",
-  appId: "1:304733564282:web:e8ec392e6fe4bf871dbac3",
-  measurementId: "G-RRWD5Z2C16"
+    authDomain: "sswt2025fall.firebaseapp.com",
+    databaseURL: "https://sswt2025fall-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "sswt2025fall",
+    storageBucket: "sswt2025fall.firebasestorage.app",
+    messagingSenderId: "304733564282",
+    appId: "1:304733564282:web:e8ec392e6fe4bf871dbac3",
+    measurementId: "G-RRWD5Z2C16"
 };
 
-let database = null;
-window.firebaseReady = false;
-
-try {
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js");
-    const { getDatabase } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js");
-    
-    const app = initializeApp(firebaseConfig);
-    database = getDatabase(app);
-    window.firebaseReady = true;
-    window.firebaseDB = database;
-    
-    document.getElementById("connectionStatus").className = "status-indicator status-online";
-    document.getElementById("connectionStatus").textContent = "🟢 Connected to Firebase";
-    
-    console.log("✅ Firebase connected!");
-} catch (err) {
-    console.warn("⚠️ Firebase unavailable");
-    document.getElementById("connectionStatus").className = "status-indicator status-offline";
-    document.getElementById("connectionStatus").textContent = "🔴 Offline Mode";
-}
-
-// Load scores function
-window.loadFirebaseScores = async function(limit = 500) {
-    if (!window.firebaseReady || !database) {
-        // Return local data
-        const local = JSON.parse(localStorage.getItem("galagaScores") || "[]");
-        return local.sort((a, b) => b.score - a.score).slice(0, limit);
-    }
-    
-    try {
-        const { ref, query, orderByChild, limitToLast, get } = await import(
-            "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js"
-        );
-        
-        const scoresRef = ref(database, "scores");
-        const q = query(scoresRef, orderByChild("score"), limitToLast(limit));
-        const snapshot = await get(q);
-        
-        if (!snapshot.exists()) {
-            return [];
-        }
-        
-        const result = [];
-        snapshot.forEach(child => result.push(child.val()));
-        
-        return result.sort((a, b) => b.score - a.score);
-        
-    } catch (err) {
-        console.error("Firebase load error:", err);
-        const local = JSON.parse(localStorage.getItem("galagaScores") || "[]");
-        return local.sort((a, b) => b.score - a.score);
-    }
-};
-
-// Initialize
-window.addEventListener("load", () => {
-    setTimeout(() => loadLeaderboard(), 500);
-});
-</script>
-
-<script>
-/* ============================================================
-   LEADERBOARD ENGINE
-============================================================ */
-let allScores = [];
-let filteredScores = [];
-let currentSort = { column: "score", direction: "desc" };
-let currentFilter = "all";
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 /* ============================================================
-   LOAD LEADERBOARD
+   🏆 Leaderboard 불러오기
 ============================================================ */
-async function loadLeaderboard() {
-    const tbody = document.getElementById("leaderboardBody");
-    tbody.innerHTML = `<tr><td colspan="6" class="loading">Loading leaderboard</td></tr>`;
-    
-    try {
-        const scores = await window.loadFirebaseScores(500);
-        
-        if (!scores || scores.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="no-data">No scores found. Be the first to play!</td></tr>`;
-            updateStats([]);
-            return;
-        }
-        
-        allScores = scores;
-        updateStats(scores);
-        applyFilter(currentFilter);
-        
-    } catch (err) {
-        console.error("Failed to load:", err);
-        tbody.innerHTML = `<tr><td colspan="6" class="no-data">Error loading data. Please refresh.</td></tr>`;
-    }
-}
+const tbody = document.getElementById("leaderboardBody");
 
-/* ============================================================
-   UPDATE STATS
-============================================================ */
-function updateStats(scores) {
-    // Total players (unique student IDs)
-    const uniquePlayers = new Set(scores.map(s => s.studentId)).size;
-    document.getElementById("totalPlayers").textContent = uniquePlayers;
-    
-    // Highest score
-    const highest = scores.length > 0 ? Math.max(...scores.map(s => s.score)) : 0;
-    document.getElementById("highestScore").textContent = highest.toLocaleString();
-    
-    // Stage 10 cleared
-    const stage10 = scores.filter(s => s.stage >= 10).length;
-    document.getElementById("stage10Count").textContent = stage10;
-    
-    // Today's games
-    const today = new Date().toDateString();
-    const todayGames = scores.filter(s => {
-        const scoreDate = new Date(s.date || s.timestamp).toDateString();
-        return scoreDate === today;
-    }).length;
-    document.getElementById("todayCount").textContent = todayGames;
-}
+// Firebase “scores” 경로에서 전체 데이터 읽기
+const scoresRef = ref(db, "scores");
 
-/* ============================================================
-   FILTER
-============================================================ */
-function applyFilter(filterType) {
-    currentFilter = filterType;
-    
-    // Update tab UI
-    document.querySelectorAll(".filter-tab").forEach(tab => {
-        tab.classList.remove("active");
-    });
-    const selected = document.querySelector(`[data-filter="${filterType}"]`);
-    if (selected) selected.classList.add("active");
-    
-    let data = [...allScores];
-    
-    switch (filterType) {
-        case "top":
-            data = data.sort((a, b) => b.score - a.score).slice(0, 10);
-            break;
-        case "stage10":
-            data = data.filter(s => s.stage >= 10);
-            break;
-        case "today":
-            const today = new Date().toDateString();
-            data = data.filter(s => {
-                const scoreDate = new Date(s.date || s.timestamp).toDateString();
-                return scoreDate === today;
-            });
-            break;
-    }
-    
-    filteredScores = data;
-    applySort(currentSort.column, true);
-}
-
-/* ============================================================
-   SORTING
-============================================================ */
-function applySort(column, skipToggle = false) {
-    if (!skipToggle) {
-        if (currentSort.column === column) {
-            currentSort.direction = currentSort.direction === "asc" ? "desc" : "asc";
-        } else {
-            currentSort.column = column;
-            currentSort.direction = column === "score" ? "desc" : "asc";
-        }
-    }
-    
-    // Update header UI
-    document.querySelectorAll("th").forEach(th => {
-        th.classList.remove("sort-asc", "sort-desc");
-    });
-    const th = document.querySelector(`th[data-col="${column}"]`);
-    if (th) {
-        th.classList.add(currentSort.direction === "asc" ? "sort-asc" : "sort-desc");
-    }
-    
-    filteredScores.sort((a, b) => {
-        let A, B;
-        
-        switch (column) {
-            case "studentId":
-                A = (a.studentId || "").toLowerCase();
-                B = (b.studentId || "").toLowerCase();
-                break;
-            case "name":
-                A = (a.playerName || "").toLowerCase();
-                B = (b.playerName || "").toLowerCase();
-                break;
-            case "date":
-                A = new Date(a.date || a.timestamp).getTime();
-                B = new Date(b.date || b.timestamp).getTime();
-                break;
-            default:
-                A = a[column] || 0;
-                B = b[column] || 0;
-        }
-        
-        if (currentSort.direction === "asc") return A > B ? 1 : -1;
-        return A < B ? 1 : -1;
-    });
-    
-    renderTable();
-}
-
-/* ============================================================
-   RENDER TABLE
-============================================================ */
-function renderTable() {
-    const tbody = document.getElementById("leaderboardBody");
-    const search = document.getElementById("searchBox").value.toLowerCase();
-    
-    let rows = filteredScores;
-    
-    // Apply search
-    if (search) {
-        rows = rows.filter(s =>
-            (s.studentId || "").toLowerCase().includes(search) ||
-            (s.playerName || "").toLowerCase().includes(search)
-        );
-    }
-    
-    if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="no-data">No matching results found.</td></tr>`;
+onValue(scoresRef, (snapshot) => {
+    if (!snapshot.exists()) {
+        tbody.innerHTML = `<tr><td colspan="6">No scores yet</td></tr>`;
         return;
     }
-    
-    tbody.innerHTML = rows.map((s, idx) => {
-        const rank = idx + 1;
-        const rankClass = rank <= 3 ? `rank-${rank}` : "";
-        const rankDisplay = rank <= 3 ? ["🥇", "🥈", "🥉"][rank - 1] : rank;
-        const stageClass = s.stage >= 10 ? "stage-complete" : "";
-        
-        return `
+
+    const data = snapshot.val();
+    const arr = Object.values(data);
+
+    // 💡 최신 → 최고 점수 순으로 정렬 (정확한 순위 보장)
+    arr.sort((a, b) => {
+        if (b.score === a.score) {
+            return b.timestamp - a.timestamp;
+        }
+        return b.score - a.score;
+    });
+
+    // HTML 렌더링
+    tbody.innerHTML = "";
+    arr.forEach((item, index) => {
+        const dateStr = new Date(item.timestamp).toLocaleString("ko-KR");
+
+        tbody.innerHTML += `
             <tr>
-                <td class="${rankClass}">${rankDisplay}</td>
-                <td class="student-id">${s.studentId || "N/A"}</td>
-                <td>${s.playerName || "Unknown"}</td>
-                <td class="score">${(s.score || 0).toLocaleString()}</td>
-                <td class="${stageClass}">${s.stage || 1}${s.stage >= 10 ? " ⭐" : ""}</td>
-                <td>${formatDate(s.date || s.timestamp)}</td>
+                <td>${index + 1}</td>
+                <td>${item.studentId}</td>
+                <td>${item.playerName}</td>
+                <td>${item.score.toLocaleString()}</td>
+                <td>${item.stage}</td>
+                <td>${dateStr}</td>
             </tr>
         `;
-    }).join("");
-}
+    });
 
-function formatDate(dateStr) {
-    if (!dateStr) return "N/A";
-    const d = new Date(dateStr);
-    return d.toLocaleDateString() + " " + d.toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"});
-}
-
-/* ============================================================
-   SEARCH HANDLER
-============================================================ */
-document.getElementById("searchBox").addEventListener("input", () => {
-    renderTable();
 });
-
-/* ============================================================
-   CSV EXPORT
-============================================================ */
-function exportCSV() {
-    const rows = [
-        ["Rank", "Student ID", "Name", "Score", "Stage", "Date"],
-        ...filteredScores.map((s, idx) => [
-            idx + 1,
-            s.studentId || "N/A",
-            s.playerName || "Unknown",
-            s.score || 0,
-            s.stage || 1,
-            formatDate(s.date || s.timestamp)
-        ])
-    ];
-    
-    const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `galaga_leaderboard_${new Date().toISOString().split("T")[0]}.csv`;
-    a.click();
-}
-
-/* ============================================================
-   AUTO REFRESH (60 seconds)
-============================================================ */
-setInterval(() => {
-    loadLeaderboard();
-}, 60000);
-
-/* ============================================================
-   EXPOSE TO WINDOW
-============================================================ */
-window.loadLeaderboard = loadLeaderboard;
-window.applyFilter = applyFilter;
-window.applySort = applySort;
-window.exportCSV = exportCSV;
 </script>
 
 </body>
