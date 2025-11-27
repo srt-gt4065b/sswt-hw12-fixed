@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Leaderboard</title>
+    <style>
+        body {
+            background: #0a0a1a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 25px;
+        }
+        h1 {
+            text-align: center;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(255,255,255,0.05);
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+        }
+        th {
+            background: rgba(0,255,150,0.2);
+            color: #00ffcc;
+        }
+        tr:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .btn {
+            display: block;
+            margin: 20px auto;
+            width: 200px;
+            padding: 12px;
+            background: #00ffcc;
+            color: #000;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #00ffaa;
+        }
+    </style>
+</head>
+<body>
+
+<h1>🏆 GALAGA Leaderboard</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Score</th>
+            <th>Stage</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody id="leaderboardBody">
+        <tr><td colspan="6">Loading...</td></tr>
+    </tbody>
+</table>
+
+<button class="btn" onclick="location.href='index.html'">🎮 Back to Game</button>
+
+<script type="module">
+/* ============================================================
+   🔥 Firebase 초기화
+============================================================ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDKHFod7Hr8qeUgUb052Ir3DCxF0ZRb6To",
+    authDomain: "sswt2025fall.firebaseapp.com",
+    databaseURL: "https://sswt2025fall-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "sswt2025fall",
+    storageBucket: "sswt2025fall.firebasestorage.app",
+    messagingSenderId: "304733564282",
+    appId: "1:304733564282:web:e8ec392e6fe4bf871dbac3",
+    measurementId: "G-RRWD5Z2C16"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* ============================================================
+   🏆 Leaderboard 불러오기
+============================================================ */
+const tbody = document.getElementById("leaderboardBody");
+
+// Firebase “scores” 경로에서 전체 데이터 읽기
+const scoresRef = ref(db, "scores");
+
+onValue(scoresRef, (snapshot) => {
+    if (!snapshot.exists()) {
+        tbody.innerHTML = `<tr><td colspan="6">No scores yet</td></tr>`;
+        return;
+    }
+
+    const data = snapshot.val();
+    const arr = Object.values(data);
+
+    // 💡 최신 → 최고 점수 순으로 정렬 (정확한 순위 보장)
+    arr.sort((a, b) => {
+        if (b.score === a.score) {
+            return b.timestamp - a.timestamp;
+        }
+        return b.score - a.score;
+    });
+
+    // HTML 렌더링
+    tbody.innerHTML = "";
+    arr.forEach((item, index) => {
+        const dateStr = new Date(item.timestamp).toLocaleString("ko-KR");
+
+        tbody.innerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${item.studentId}</td>
+                <td>${item.playerName}</td>
+                <td>${item.score.toLocaleString()}</td>
+                <td>${item.stage}</td>
+                <td>${dateStr}</td>
+            </tr>
+        `;
+    });
+
+});
+</script>
+
+</body>
+</html>
